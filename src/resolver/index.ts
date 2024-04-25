@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { jwtHelper } from "../utils/jwtHelper";
 
 const prisma = new PrismaClient();
 
@@ -18,6 +19,17 @@ export const resolvers = {
   },
   Mutation: {
     signup: async (parent: any, args: userInfo, context: any) => {
+      const isExist = await prisma.user.findFirst({
+        where: {
+          email: args.email,
+        },
+      });
+      if (isExist) {
+        return {
+          userError: "Already this email is registered!",
+          token: null,
+        };
+      }
       const hashedPassword = await bcrypt.hash(args.password, 12);
 
       const newUser = await prisma.user.create({
@@ -28,9 +40,7 @@ export const resolvers = {
         },
       });
 
-      const token = jwt.sign({ userId: newUser.id }, "signature", {
-        expiresIn: "1d",
-      });
+      const token = await jwtHelper({ userId: newUser.id });
       console.log("tttt", token);
       return {
         userError: null,
@@ -59,9 +69,7 @@ export const resolvers = {
           token: null,
         };
       }
-      const token = await jwt.sign({ userId: user.id }, "signature", {
-        expiresIn: "1d",
-      });
+      const token = await jwtHelper({ userId: user.id });
       return {
         userError: null,
         token,
