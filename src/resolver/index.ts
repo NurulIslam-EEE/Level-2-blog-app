@@ -28,7 +28,7 @@ export const resolvers = {
         },
       });
 
-      const token = await jwt.sign({ userId: newUser.id }, "signature", {
+      const token = jwt.sign({ userId: newUser.id }, "signature", {
         expiresIn: "1d",
       });
       console.log("tttt", token);
