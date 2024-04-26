@@ -67,7 +67,7 @@ export const postResolvers = {
     }
 
     const error = await checkUserAccess(prisma, userInfo.userId, args.postId);
-    console.log("73", error);
+    // console.log("73", error);
     if (error) {
       return error;
     }
