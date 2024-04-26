@@ -1,3 +1,5 @@
+import { checkUserAccess } from "../../utils/checkUserAccess";
+
 export const postResolvers = {
   addPost: async (parent: any, { post }: any, { prisma, userInfo }: any) => {
     console.log(userInfo, "infoooo");
@@ -38,40 +40,11 @@ export const postResolvers = {
       };
     }
 
-    const user = await prisma.user.findUnique({
-      where: {
-        id: userInfo.userId,
-      },
-    });
-
-    if (!user) {
-      return {
-        userError: "user not found",
-        post: null,
-      };
+    const error = checkUserAccess(prisma, userInfo.userId, args.postId);
+    if (error) {
+      return error;
     }
 
-    const post = await prisma.post.findUnique({
-      where: {
-        id: Number(args.postId),
-      },
-    });
-
-    if (!post) {
-      return {
-        userError: "post not found",
-        post: null,
-      };
-    }
-
-    if (post.authorId !== user.id) {
-      return {
-        userError: "post not own by you",
-        post: null,
-      };
-    }
-
-    console.log("user", user, "ppp", post);
     const updatedPost = await prisma.post.update({
       where: {
         id: Number(args.postId),
@@ -82,6 +55,32 @@ export const postResolvers = {
     return {
       userError: null,
       post: updatedPost,
+    };
+  },
+  deletePost: async (parent: any, args: any, { prisma, userInfo }: any) => {
+    console.log("61", args, userInfo);
+    if (!userInfo) {
+      return {
+        userError: "Unauthorized",
+        post: null,
+      };
+    }
+
+    const error = await checkUserAccess(prisma, userInfo.userId, args.postId);
+    console.log("73", error);
+    if (error) {
+      return error;
+    }
+
+    const deletedPost = await prisma.post.delete({
+      where: {
+        id: Number(args.postId),
+      },
+    });
+
+    return {
+      userError: null,
+      post: deletedPost,
     };
   },
 };
