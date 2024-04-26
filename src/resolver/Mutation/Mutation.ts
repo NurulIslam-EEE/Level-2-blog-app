@@ -84,6 +84,33 @@ export const Mutation = {
     };
   },
   addPost: async (parent: any, args: any, { prisma, userInfo }: any) => {
-    console.log(args);
+    console.log(userInfo, "infoooo");
+
+    if (!userInfo) {
+      return {
+        userError: "Unauthorized",
+        post: null,
+      };
+    }
+
+    if (!args.title || !args.content) {
+      return {
+        userError: "Title and content is required!",
+        post: null,
+      };
+    }
+
+    const newPost = await prisma.post.create({
+      data: {
+        title: args.title,
+        content: args.content,
+        authorId: userInfo.userId,
+      },
+    });
+
+    return {
+      userError: null,
+      post: newPost,
+    };
   },
 };
