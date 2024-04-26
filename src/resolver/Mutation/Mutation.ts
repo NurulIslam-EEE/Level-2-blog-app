@@ -11,7 +11,7 @@ interface userInfo {
 }
 const prisma = new PrismaClient();
 export const Mutation = {
-  signup: async (parent: any, args: userInfo, context: any) => {
+  signup: async (parent: any, args: userInfo, { Prisma }: any) => {
     const isExist = await prisma.user.findFirst({
       where: {
         email: args.email,
@@ -42,7 +42,7 @@ export const Mutation = {
       });
     }
 
-    const token = await jwtHelper(
+    const token = await jwtHelper.generateToken(
       { userId: newUser.id },
       config.jwt.secret as string
     );
@@ -52,7 +52,7 @@ export const Mutation = {
       token,
     };
   },
-  signin: async (parent: any, args: any, context: any) => {
+  signin: async (parent: any, args: any, { prisma }: any) => {
     const user = await prisma.user.findFirst({
       where: {
         email: args.email,
@@ -74,7 +74,7 @@ export const Mutation = {
         token: null,
       };
     }
-    const token = await jwtHelper(
+    const token = await jwtHelper.generateToken(
       { userId: user.id },
       config.jwt.secret as string
     );
@@ -82,5 +82,8 @@ export const Mutation = {
       userError: null,
       token,
     };
+  },
+  addPost: async (parent: any, args: any, { prisma, userInfo }: any) => {
+    console.log(args);
   },
 };
