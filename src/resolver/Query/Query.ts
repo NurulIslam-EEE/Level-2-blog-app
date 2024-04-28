@@ -1,17 +1,17 @@
 export const Query = {
   me: async (parent: any, args: any, { prisma, userInfo }: any) => {
-    console.log(userInfo, "cccc");
+    console.log(userInfo, "weeeee");
     return await prisma.user.findUnique({
       where: {
-        id: userInfo.userId,
+        id: Number(userInfo.userId),
       },
     });
   },
   profile: async (parent: any, args: any, { prisma, userInfo }: any) => {
-    console.log(args, "cccc");
+    console.log(args, "ffff");
     return await prisma.profile.findUnique({
       where: {
-        userId: Number(userInfo.userId),
+        userId: Number(args.userId),
       },
     });
   },
